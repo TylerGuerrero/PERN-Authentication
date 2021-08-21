@@ -1,16 +1,22 @@
-import express from 'express'
-import bcryptjs from 'bcryptjs'
+const { Router } = await import('express')
+const { compare, genSalt, hash} = await import('bcryptjs')
+const { sign } = await import('jsonwebtoken')
 
 // pg client
 import client from '../config/DB.js'
 
 // Validation
-import { registerValidation } from '../validation/AuthValidation.js'
+import { registerValidation, loginValidation } from '../validation/AuthValidation.js'
 
-const { Router } = express
+// Middleware
+import { authValidation } from '../middleware/Authorization.js'
+
 const router = Router({ caseSensitive: true, strict: true }) 
 
-const { genSalt, hash, compare } = bcryptjs
+// create jwt token 
+function createToken (email, id) {
+    return sign({ email, id }, process.env.JWT_SECRET, { expiresIn: 3*24*60*60 })
+}
 
 // register a user route
 router.post("/register", async (req, res) => {
@@ -28,8 +34,10 @@ router.post("/register", async (req, res) => {
         const hashedPasssword = await hash(password, salt)
         user = await client.query("INSERT INTO users (id, name, email, password) VALUES(DEFAULT, $1, $2, $3) RETURNING *",
             [name, email, hashedPasssword])
-
-        return res.status(201).json(user.rows[0])
+        
+        const token = createToken(user.rows[0].email, user.rows[0].id)
+        res.cookie("jwt", token, { httpOnly: true, maxAge: 3*24*60*60 })
+        return res.status(201).json(user.rows[0], token)
     } catch (error) {
         console.log(error)
         return res.status(500).json({ error: error.message })
@@ -37,16 +45,35 @@ router.post("/register", async (req, res) => {
 })
 
 router.post("/login", async (req, res) => {
-    try {
+    const { email, password } = req.body
+    const { error } = loginValidation(req.body)
 
+    if (error) return res.status(401).json({ error: error.details[0].message })
+    
+    try {
+        const user = await client.query("SELECT * FROM users WHERE email = $1", [email])
+
+        if (user.rows.length === 0) return res.status(401).json({ error: "User does not exist" })
+    
+        const isMatch = await compare(password, user.rows[0].password)
+
+        if (isMatch) {
+            return res.status(401).json({ error: "Password does not match" })
+        } else {
+            const token = createToken(user.rows[0].email, user.rows[0].id)
+            res.cookie("jwt", token, { httpOnly: true, maxAge: 3*24*60*60 })
+            return res.status(201).json(user.rows[0], token)
+        }
     } catch (error) {
         console.log(error)
         return res.status(500).json({ error: error.message })
     }
 })
 
-router.get("/logout", (req, res) => {
-
+router.get("/logout", authValidation, (req, res) => {
+    console.log(req.user)
+    res.cookie("jwt", " ", 3)
+    return res.status(201).json({ msg: "User logged out" })
 })
 
 

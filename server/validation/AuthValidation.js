@@ -9,3 +9,12 @@ export const registerValidation = (body) => {
 
     return schema.validate(body)
 }
+
+export const loginValidation = (body) => {
+    const schema = joi.object({
+        email: joi.string().min(6).max(255).required().email(),
+        password: joi.string().min(6).max(255).required()
+    })
+
+    return schema.validate(body)
+}
