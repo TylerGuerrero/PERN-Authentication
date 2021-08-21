@@ -14,11 +14,12 @@ export const authValidation = async (req, res, next) => {
 
     try {
         const payload = verify(token, process.env.JWT_SECRET)
-        const user = await client.query("SELECT name, email FROM users WHERE id = $1", [payload.id])
+        const user = await client.query("SELECT id, name, email FROM users WHERE id = $1", [payload.id])
         
         if (user.rows.length === 0) return res.status(401).json({ error: "User not found" })
 
-        req.user = user.rows[0]
+        const { id, email, name } = user.rows[0]
+        req.user = { id, email, name }
         next()
     } catch (error) {
         console.log(error)
