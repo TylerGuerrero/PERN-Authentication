@@ -1,6 +1,10 @@
+import bcryptjs from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+
 const { Router } = await import('express')
-const { compare, genSalt, hash} = await import('bcryptjs')
-const { sign } = await import('jsonwebtoken')
+
+const { sign } = jwt
+const { compare, genSalt, hash } = bcryptjs
 
 // pg client
 import client from '../config/DB.js'
@@ -37,7 +41,7 @@ router.post("/register", async (req, res) => {
         
         const token = createToken(user.rows[0].email, user.rows[0].id)
         res.cookie("jwt", token, { httpOnly: true, maxAge: 3*24*60*60 })
-        return res.status(201).json(user.rows[0], token)
+        return res.status(201).json({user: user.rows[0], token})
     } catch (error) {
         console.log(error)
         return res.status(500).json({ error: error.message })
@@ -58,11 +62,11 @@ router.post("/login", async (req, res) => {
         const isMatch = await compare(password, user.rows[0].password)
 
         if (isMatch) {
-            return res.status(401).json({ error: "Password does not match" })
-        } else {
             const token = createToken(user.rows[0].email, user.rows[0].id)
             res.cookie("jwt", token, { httpOnly: true, maxAge: 3*24*60*60 })
-            return res.status(201).json(user.rows[0], token)
+            return res.status(201).json({user: user.rows[0], token})
+        } else {
+            return res.status(401).json({ error: "Password does not match" })
         }
     } catch (error) {
         console.log(error)

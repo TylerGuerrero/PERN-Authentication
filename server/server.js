@@ -4,8 +4,9 @@ import morgan from 'morgan'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 
-// Routes
+// Router Modules
 import AuthRoutes from './routes/AuthRoutes.js'
+import DashBoardRoutes from './routes/DashboardRoutes.js'
 
 // init server
 const app = express()
@@ -18,7 +19,9 @@ app.use(morgan('dev'))
 app.use(cors({ origin: "http://localhost:3000", credentials: true }))
 app.use(cookieParser())
 
+// Routes 
 app.use("/api/auth", AuthRoutes)
+app.use("/api/dashboard", DashBoardRoutes)
 
 const PORT = process.env.PORT || 5000
 const server = app.listen(PORT, () => {
