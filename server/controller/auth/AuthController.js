@@ -5,10 +5,10 @@ const { compare, genSalt, hash } = bcryptjs
 const { sign } = jwt
 
 // Validations
-import { loginValidation, registerValidation } from '../validation/AuthValidation.js'
+import { loginValidation, registerValidation } from '../../validation/auth/AuthValidation.js'
 
 // pg client
-import client from '../config/DB.js'
+import client from '../../config/DB.js'
 
 // create jwt token 
 function createToken (email, id) {
@@ -56,7 +56,7 @@ export const loginController = async (req, res) => {
         if (isMatch) {
             const token = createToken(user.rows[0].email, user.rows[0].id)
             res.cookie("jwt", token, { httpOnly: true, maxAge: 3*24*60*60 })
-            return res.status(201).json({user: user.rows[0], token})
+            return res.status(200).json({user: user.rows[0], token})
         } else {
             return res.status(401).json({ error: "Password does not match" })
         }
@@ -68,5 +68,5 @@ export const loginController = async (req, res) => {
 
 export const logout = (req, res) => {
     res.cookie("jwt", " ", 3)
-    return res.status(201).json({ msg: "User logged out" })
+    return res.status(200).json({ msg: "User logged out" })
 }

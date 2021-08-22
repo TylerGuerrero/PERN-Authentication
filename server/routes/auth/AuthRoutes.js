@@ -1,10 +1,10 @@
 const { Router } = await import('express')
 
 // Controllers
-import { loginController, registerController, logout } from '../controller/AuthController.js'
+import { loginController, registerController, logout } from '../../controller/auth/AuthController.js'
 
 // Middleware
-import { authValidation } from '../middleware/Authorization.js'
+import { authValidation } from '../../middleware/Authorization.js'
 
 const router = Router({ caseSensitive: true, strict: true }) 
 
