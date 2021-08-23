@@ -33,7 +33,7 @@ export const registerController = async (req, res) => {
         
         const token = createToken(user.rows[0].email, user.rows[0].id)
         res.cookie("jwt", token, { httpOnly: true, maxAge: 3*24*60*60 })
-        return res.status(201).json({user: user.rows[0], token})
+        return res.status(201).json({ user: user.rows[0], token })
     } catch (error) {
         console.log(error)
         return res.status(500).json({ error: error.message })
