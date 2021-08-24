@@ -1,5 +1,9 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
+import axios from 'axios'
+import { toast } from 'react-toastify';
+
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 // Components
@@ -15,6 +19,21 @@ function App() {
   const setAuth = (state) => {
     setIsAuthenticated(state)
   }
+
+  async function isAuth () {
+    try {
+      const { data } = await axios.get("http://localhost:5000/api/auth/is-verify", { headers: { token: JSON.parse(localStorage.getItem("token"))}})
+      data === true ? setIsAuthenticated(true) : setIsAuthenticated(false)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    isAuth()
+  }, [])
+
+  toast.configure()
 
   return (
     <Fragment>

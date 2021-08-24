@@ -70,3 +70,12 @@ export const logout = (req, res) => {
     res.cookie("jwt", " ", 3)
     return res.status(200).json({ msg: "User logged out" })
 }
+
+export const isVerify = (req, res) => {
+    try {   
+        return res.status(200).json(true)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ error: error.message })
+    }
+}

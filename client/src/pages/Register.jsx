@@ -1,5 +1,6 @@
 import React, { Fragment, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import axios from 'axios'
 
 const Register = ({ setAuth }) => {
@@ -15,9 +16,17 @@ const Register = ({ setAuth }) => {
 
         try {
             const { data } = await axios.post("http://localhost:5000/api/auth/register", { email, name, password }, { headers: {"Content-Type": "application/json" }})
-            localStorage.setItem("token", JSON.stringify(data.token))
-            setFormData({ email: "", name: "", password: "" })
-            setAuth(true)
+
+            if (data?.token) {
+                localStorage.setItem("token", JSON.stringify(data.token))
+                setFormData({ email: "", name: "", password: "" })
+                setAuth(true)
+                toast.success("Register Success")
+            } else {
+                setAuth(false)
+                toast.error(data.error)
+            }
+
         } catch (error) {   
             console.error(error.message)
         }
