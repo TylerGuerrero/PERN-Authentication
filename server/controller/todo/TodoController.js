@@ -36,7 +36,10 @@ export const getSingleTodo = async (req, res) => {
 
 export const getTodos = async (req, res) => {
     try {
-        const todos = await client.query("SELECT * FROM todos")
+        const todos = await client.query(
+            "SELECT u.name, t.id, t.description FROM users u LEFT JOIN todos t ON u.id = t.user_id WHERE u.id = $1"
+            [req.user.id]
+        )
         
         if (todos.rows.length === 0) return res.status(401).json({ error: "Todos does not exist" })
         
